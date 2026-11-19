@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>每日安全施工程序記錄 (手機版 - 按公司分類名單)</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft JhengHei", sans-serif;
+            background-color: #eef2f6;
+            margin: 0;
+            padding: 10px 10px 40px 10px;
+            color: #1a202c;
+            font-size: 15px;
+            line-height: 1.45;
+        }
+        .app-wrap { max-width: 720px; margin: 0 auto; }
+
+        /* 頂部標題卡 */
+        .top-card {
+            background: linear-gradient(135deg, #1e3a5f, #2b6cb0);
+            color: #fff;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 3px 10px rgba(30,58,95,0.2);
+        }
+        .top-card h1 { margin: 0; font-size: 19px; }
+        .top-card .sub { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+        .top-card .warn {
+            margin-top: 10px;
+            background: rgba(255,255,255,0.15);
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 12.5px;
+        }
+
+        /* 摺疊區塊 */
+        details.card {
+            background: #fff;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        details.card > summary {
+            list-style: none;
+            padding: 14px 16px;
+            font-weight: 700;
+            font-size: 16px;
+            color: #1a365d;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        details.card > summary::-webkit-details-marker { display: none; }
+        details.card > summary::after { content: "▾"; font-size: 18px; color: #4a5568; }
+        details.card:not([open]) > summary::after { content: "▸"; }
+        .card-body { padding: 14px 16px; }
+
+        /* 輸入欄位 */
+        .form-group { margin-bottom: 14px; }
+        .form-group label.lbl {
+            display: block;
+            font-weight: 700;
+            font-size: 14px;
+            color: #2d3748;
+            margin-bottom: 6px;
+        }
+        input[type="text"], input[type="datetime-local"], select {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1.5px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 15px;
+            background: #fff;
+        }
+        input:focus, select:focus { outline: none; border-color: #3182ce; }
+
+        /* 按公司分類名單管理區 */
+        .roster-box {
+            background: #f8fafc;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+        }
+        .roster-toolbar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .company-filter {
+            width: auto !important;
+            min-width: 120px;
+            padding: 7px 10px !important;
+            font-size: 13.5px !important;
+            border-radius: 6px !important;
+            font-weight: 600;
+            color: #1a365d;
+        }
+        .roster-search {
+            flex: 1;
+            min-width: 130px;
+            padding: 7px 10px !important;
+            font-size: 13.5px !important;
+            border-radius: 6px !important;
+        }
+        .mini-btn {
+            background: #e2e8f0;
+            color: #2d3748;
+            border: none;
+            border-radius: 6px;
+            padding: 7px 10px;
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .mini-btn:active { background: #cbd5e0; }
+        .roster-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 2px;
+        }
+        .chip-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff;
+            border: 1.5px solid #cbd5e0;
+            border-radius: 20px;
+            padding: 6px 11px;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #2d3748;
+            cursor: pointer;
+            user-select: none;
+        }
+        .chip-btn input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #2b6cb0;
+            margin: 0;
+        }
+        .comp-badge {
+            font-size: 11px;
+            background: #ebf8ff;
+            color: #2b6cb0;
+            border: 1px solid #bee3f8;
+            padding: 1px 6px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+        .count-tag {
+            font-size: 12px;
+            color: #2b6cb0;
+            font-weight: 700;
+            margin-left: 6px;
+        }
+
+        /* 人機物法環分組 */
+        .cat-box {
+            border: 1px solid #cbd5e0;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 14px;
+            background: #fcfdff;
+        }
+        .cat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .cat-badge {
+            background: #2b6cb0;
+            color: #fff;
+            font-weight: 800;
+            font-size: 16px;
+            padding: 3px 11px;
+            border-radius: 6px;
+        }
+        .exec-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+        .exec-row select { width: auto; padding: 6px 10px; font-size: 14px; }
+
+        .hazard-block {
+            background: #f1f5f9;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .hazard-title { font-weight: 700; color: #1a202c; margin-bottom: 6px; font-size: 14px; }
+        .ctrl-title { font-size: 12.5px; color: #4a5568; font-weight: 700; margin: 8px 0 4px 0; }
+
+        /* 大尺寸核取方塊 */
+        .chk {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 7px 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .chk:active { background: #edf2f7; }
+        .chk input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 1px;
+            flex-shrink: 0;
+            accent-color: #2b6cb0;
+        }
+        .hi { background: #fef08a; padding: 1px 4px; border-radius: 3px; }
+
+        /* 簽名板 */
+        .canvas-wrap {
+            width: 100%;
+            height: 150px;
+            border: 2px dashed #3182ce;
+            border-radius: 10px;
+            background: #fff;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+        canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+
+        .btn-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+        button.action-btn {
+            flex: 1;
+            min-width: 130px;
+            padding: 13px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            background: #2b6cb0;
+            cursor: pointer;
+        }
+        .btn-green { background: #2f855a; }
+        .btn-gray { background: #718096; }
+        .btn-red { background: #c53030; border: none; color: #fff; padding: 6px 10px; font-size: 12px; border-radius: 6px; font-weight: 700; cursor: pointer; }
+
+        /* 簽名紀錄卡片 */
+        .sig-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 8px;
+            background: #f8fafc;
+            gap: 8px;
+        }
+        .sig-item img { max-height: 44px; max-width: 110px; background: #fff; border: 1px solid #cbd5e0; border-radius: 4px; }
+
+        /* 列印 / 匯出 PDF 時自動展開並轉為報告格式 */
+        @media print {
+            body { background: #fff; padding: 0; font-size: 11px; }
+            .no-print { display: none !important; }
+            details.card { box-shadow: none; border: 1px solid #ccc; border-radius: 0; margin-bottom: 8px; }
+            details.card > summary::after { content: "" !important; }
+            .hi { background: transparent !important; }
+            input, select { border: none; border-bottom: 1px solid #333; padding: 2px 4px; font-size: 11px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-wrap">
+    <div class="top-card">
+        <h1>每日安全施工程序記錄</h1>
+        <div class="sub">Rev.20261116｜安全施工程序（按公司分類名單版）</div>
+        <div class="warn">⚠️ 注意：此評估須在有關的工地內進行；如人機物法環出現重大轉變，須通知上級作決定。</div>
+    </div>
+
+    <!-- 1. 基本資料與人員 -->
+    <details class="card" open>
+        <summary>1. 工作資料與人員名單</summary>
+        <div class="card-body">
+            <div class="form-group">
+                <label class="lbl">工作內容</label>
+                <input type="text" id="workContent" value="Refurbishment of External Wall Finishes">
+            </div>
+            <div class="form-group">
+                <label class="lbl">工作地點</label>
+                <input type="text" id="workLocation" placeholder="輸入樓層 / 棚架位置 / 區域">
+            </div>
+            <div class="form-group">
+                <label class="lbl">日期及時間</label>
+                <input type="datetime-local" id="workDateTime">
+            </div>
+            <div class="form-group">
+                <label class="lbl">高危工作（如有）</label>
+                <label class="chk"><input type="checkbox" checked> <span class="hi">高空工作</span></label>
+                <label class="chk"><input type="checkbox"> 密閉空間</label>
+                <label class="chk"><input type="checkbox"> 挖掘工作</label>
+                <label class="chk"><input type="checkbox"> 吊運</label>
+                <label class="chk"><input type="checkbox"> 其他：<input type="text" placeholder="註明" style="margin-left:6px;"></label>
+            </div>
+
+            <div class="form-group">
+                <label class="lbl">隊長或評估員 <span id="count-assessors" class="count-tag"></span></label>
+                <div id="roster-assessors" class="roster-box no-print"></div>
+                <input type="text" id="input-assessors" placeholder="已點選或手動輸入評估員姓名">
+            </div>
+
+            <div class="form-group">
+                <label class="lbl">傳譯員</label>
+                <input type="text" id="input-interpreter" placeholder="如適用">
+            </div>
+
+            <div class="form-group">
+                <label class="lbl">隊員（無需傳譯） <span id="count-crewNoTrans" class="count-tag"></span></label>
+                <div id="roster-crewNoTrans" class="roster-box no-print"></div>
+                <input type="text" id="input-crewNoTrans" placeholder="已點選或手動輸入隊員姓名">
+            </div>
+
+            <div class="form-group">
+                <label class="lbl">隊員（需要傳譯） <span id="count-crewTrans" class="count-tag"></span></label>
+                <div id="roster-crewTrans" class="roster-box no-print"></div>
+                <input type="text" id="input-crewTrans" placeholder="已點選或手動輸入隊員姓名">
+            </div>
+
+            <div class="form-group">
+                <label class="lbl">其他工作隊 / 訪客代表 <span id="count-others" class="count-tag"></span></label>
+                <div id="roster-others" class="roster-box no-print"></div>
+                <input type="text" id="input-others" placeholder="已點選或手動輸入代表姓名">
+            </div>
+        </div>
+    </details>
+
+    <!-- 2. 人、機、物、法、環 -->
+    <details class="card" open>
+        <summary>2. 危險性評估及安全方法（人・機・物・法・環）</summary>
+        <div class="card-body">
+            <!-- 人 -->
+            <div class="cat-box">
+                <div class="cat-header">
+                    <span class="cat-badge">人</span>
+                    <div class="exec-row">措施已執行：<select><option>是</option><option>否</option></select></div>
+                </div>
+                <div class="hazard-block">
+                    <div class="hazard-title">危險性：技能／經驗／人手不足／單獨工作</div>
+                    <div class="ctrl-title">選用安全方法：</div>
+                    <label class="chk"><input type="checkbox"> <span class="hi">安排額外人手／適合人員</span></label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">在旁指導／解釋工作流程／清晰指示</span></label>
+                    <label class="chk"><input type="checkbox"> 確保有足夠技能／使用器械輔助</label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">通訊器材／緊急應變程序／集合點</span></label>
+                </div>
+                <div class="hazard-block">
+                    <div class="hazard-title">危險性：體力／健康／精神欠佳</div>
+                    <div class="ctrl-title">選用安全方法：</div>
+                    <label class="chk"><input type="checkbox"> 安排有問題的人員離場／較輕巧的工作</label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">定時休息</span></label>
+                </div>
+                <label class="chk"><input type="checkbox"> 其他安全方法（沒有／如有）：<input type="text" placeholder="如有請填寫" style="margin-left:6px;"></label>
+            </div>
+
+            <!-- 機 -->
+            <div class="cat-box">
+                <div class="cat-header">
+                    <span class="cat-badge">機</span>
+                    <div class="exec-row">措施已執行：<select><option>是</option><option>否</option></select></div>
+                </div>
+                <div class="hazard-block">
+                    <div class="hazard-title">危險性：有裸露帶電導體／暴露機械活動部分</div>
+                    <div class="ctrl-title">選用安全方法：</div>
+                    <label class="chk"><input type="checkbox"> 關上電源／暫停機組</label>
+                    <label class="chk"><input type="checkbox"> 加裝臨時屏障／護罩</label>
+                    <label class="chk"><input type="checkbox"> 展示警告牌／圍封危險區域</label>
+                </div>
+                <div class="hazard-block">
+                    <div class="hazard-title"><label class="chk" style="padding:0;"><input type="checkbox" checked> <span class="hi">使用手提電動工具／機械工具／移動式升降工作台</span></label></div>
+                    <div class="ctrl-title">選用安全方法：</div>
+                    <label class="chk"><input type="checkbox"> <span class="hi">安排適當人員操作</span></label>
+                    <label class="chk"><input type="checkbox"> 移動式升降工作台須配備二級防護裝置</label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">依照特定操作程序工作</span></label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">檢查工具／機械是否安全可用，具有效測試／檢查</span></label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">手提電工具已繫上手繩，電池已加上索帶繫穩</span></label>
+                </div>
+                <label class="chk"><input type="checkbox"> 其他安全方法（沒有／如有）：<input type="text" placeholder="如有請填寫" style="margin-left:6px;"></label>
+            </div>
+
+            <!-- 物 -->
+            <div class="cat-box">
+                <div class="cat-header">
+                    <span class="cat-badge">物</span>
+                    <div class="exec-row">措施已執行：<select><option>是</option><option>否</option></select></div>
+                </div>
+                <div class="hazard-block">
+                    <div class="hazard-title"><span class="hi">危險性：危害性／易燃性物料／壓縮氣體／噴霧劑／腐蝕性液體</span></div>
+                    <div class="ctrl-title">選用安全方法：</div>
+                    <label class="chk"><input type="checkbox"> <span class="hi">依照標籤說明安全儲存／使用及棄置物料</span></label>
+                    <label class="chk"><input type="checkbox"> 控制火源，遠離高溫使用</label>
+                    <label class="chk"><input type="checkbox"> 留意工作位置，避免濺及身體或衣物</label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">加設手提滅火設備／加強通風</span></label>
+                </div>
+                <label class="chk"><input type="checkbox"> 其他安全方法（沒有／如有）：<input type="text" placeholder="如有請填寫" style="margin-left:6px;"></label>
+            </div>
+
+            <!-- 法 -->
+            <div class="cat-box">
+                <div class="cat-header">
+                    <span class="cat-badge">法</span>
+                    <div class="exec-row">措施已執行：<select><option>是</option><option>否</option></select></div>
+                </div>
+                <div class="hazard-block">
+                    <div class="hazard-title">危險性：電力／高溫／火焰／強光／高噪音／壓力／熱工序等／打拆</div>
+                    <div class="ctrl-title">選用安全方法：</div>
+                    <label class="chk"><input type="checkbox"> 監察溫度或壓力</label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">展示警告牌／圍封危險區域</span></label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">依照特定工作程序／安全文件進行工作（如熱工序許可證／打拆工程許可證）</span></label>
+                </div>
+                <div class="hazard-block">
+                    <div class="hazard-title">危險性：吊運危險／搬運危險／體力搬運／超負荷／危害第三者／外力衝擊</div>
+                    <div class="ctrl-title">選用安全方法：</div>
+                    <label class="chk"><input type="checkbox"> 監控重量／壓力警示／物件體積及搬運位置</label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">採用適當吊重工具／吊運方法／手推車／唧車</span></label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">展示警告牌／圍封危險區域／圍封吊運範圍</span></label>
+                    <label class="chk"><input type="checkbox"> 採用適當步驟減低外力衝擊</label>
+                </div>
+                <label class="chk"><input type="checkbox"> 其他安全方法（沒有／如有）：<input type="text" placeholder="如有請填寫" style="margin-left:6px;"></label>
+            </div>
+
+            <!-- 環 -->
+            <div class="cat-box">
+                <div class="cat-header">
+                    <span class="cat-badge">環</span>
+                    <div class="exec-row">措施已執行：<select><option>是</option><option>否</option></select></div>
+                </div>
+                <div class="hazard-block">
+                    <div class="hazard-title"><label class="chk" style="padding:0;"><input type="checkbox" checked> <span class="hi">人體下墜／棚架倒塌／地面絆倒／光線不足／夾傷</span></label></div>
+                    <div class="ctrl-title">選用安全方法：</div>
+                    <label class="chk"><input type="checkbox"> <span class="hi">設置棚架工作台，由合資格人士(CP)檢查及簽發表格五</span></label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">設置移動式升降工作平台，由合資格人士(CP)檢查及簽發表格一</span></label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">展示警告牌／圍封危險區域</span></label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">清理地面阻礙物／油污／積水等</span></label>
+                    <label class="chk"><input type="checkbox"> 使用臨時照明／帶備手電筒</label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">加裝圍欄／踢腳板／安全網／合適梯枱／合適上落通道</span></label>
+                    <label class="chk"><input type="checkbox"> 將門固定／避免將手指或其他身體部份置於門的活動範圍</label>
+                    <label class="chk"><input type="checkbox"> 重新裝設／鞏固棚架／坑板</label>
+                </div>
+                <div class="hazard-block">
+                    <div class="hazard-title">危險性：觸電／火警／爆炸</div>
+                    <div class="ctrl-title">選用安全方法：</div>
+                    <label class="chk"><input type="checkbox"> 關上電源／加裝屏障／圍欄／局部放電探測</label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">遠離可燃／易燃物品／隔離火源／嚴禁明火</span></label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">依照熱工序進行工作／加設手提滅火設備</span></label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">檢查逃生通道</span></label>
+                </div>
+                <div class="hazard-block">
+                    <div class="hazard-title"><span class="hi">危險性：高噪音／密閉空間／有害氣體</span></div>
+                    <div class="ctrl-title">選用安全方法：</div>
+                    <label class="chk"><input type="checkbox"> <span class="hi">執行噪音控制措施</span></label>
+                    <label class="chk"><input type="checkbox"> 堵塞氣體來源／物料溢進／排氣抽風／吹風</label>
+                </div>
+                <div class="hazard-block">
+                    <div class="hazard-title"><label class="chk" style="padding:0;"><input type="checkbox" checked> <span class="hi">有高空下墮物／物料下墮／地面下陷／塌塌／易碎表面</span></label></div>
+                    <div class="ctrl-title">選用安全方法：</div>
+                    <label class="chk"><input type="checkbox"> <span class="hi">用適當容器盛載手工具</span></label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">加裝踢腳板／物料防墮網</span></label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">展示警告牌／圍封危險區域</span></label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">安排於易碎表面做妥保護、再影相檢查以作紀錄</span></label>
+                </div>
+                <div class="hazard-block">
+                    <div class="hazard-title">危險性：車輛撞擊</div>
+                    <div class="ctrl-title">選用安全方法：</div>
+                    <label class="chk"><input type="checkbox"> 加添告示／雪糕筒／閃燈</label>
+                    <label class="chk"><input type="checkbox"> 安排訊號員指揮交通／倒車找人協助</label>
+                </div>
+                <div class="hazard-block">
+                    <div class="hazard-title"><span class="hi">危險性：天氣（酷熱／嚴寒／大雨／雷暴／颱風）</span></div>
+                    <div class="ctrl-title">選用安全方法：</div>
+                    <label class="chk"><input type="checkbox"> <span class="hi">留意天氣報告／通訊設施</span></label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">設置太陽傘／帳篷／防曬物品／多飲水／適當休息</span></label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">避免在當風位工作／暫停戶外工作／清除積水</span></label>
+                </div>
+                <div class="hazard-block">
+                    <div class="hazard-title">危險性：動物／昆蟲／細菌感染／疾病傳染</div>
+                    <div class="ctrl-title">選用安全方法：</div>
+                    <label class="chk"><input type="checkbox"> 趕狗棒／行山杖／蜂網／防蚊貼／蚊怕水</label>
+                    <label class="chk"><input type="checkbox"> 現場清潔／消毒等</label>
+                </div>
+                <div class="hazard-block">
+                    <div class="hazard-title"><span class="hi">危險性：空氣質素健康指數已經或預計達至甚高或嚴重水平</span></div>
+                    <div class="ctrl-title">選用安全方法：</div>
+                    <label class="chk"><input type="checkbox"> 減少戶外體力消耗或逗留時間／適當安排工作或人手</label>
+                    <label class="chk"><input type="checkbox"> <span class="hi">減少揚塵操作包括機械及執行有效防塵／大煙措施</span></label>
+                </div>
+                <label class="chk"><input type="checkbox"> 其他安全方法（沒有／如有）：<input type="text" placeholder="如有請填寫" style="margin-left:6px;"></label>
+            </div>
+        </div>
+    </details>
+
+    <!-- 3. 環保、PPE 與其他危險 -->
+    <details class="card">
+        <summary>3. 環保、個人防護裝備 (PPE) 及其他危險</summary>
+        <div class="card-body">
+            <div class="cat-box">
+                <div class="cat-header">
+                    <span class="cat-badge">環保</span>
+                    <div class="exec-row">措施已執行：<select><option>是</option><option>否</option></select></div>
+                </div>
+                <div class="hazard-title">危險性：化學品／建築廢物、污水排放、噪音滋擾、石棉危害</div>
+                <label class="chk"><input type="checkbox"> <span class="hi">妥善存放／分類棄置或吸收洩漏</span></label>
+                <label class="chk"><input type="checkbox"> 防止讓污水流入雨水渠／污染工地及週圍環境</label>
+                <label class="chk"><input type="checkbox"> <span class="hi">執行減少噪音的措施</span></label>
+                <label class="chk"><input type="checkbox"> 如發現或懷疑含有石棉物料須立即停止工作，通知上司及安健環人員</label>
+                <label class="chk"><input type="checkbox"> 其他安全方法（沒有／如有）：<input type="text" placeholder="如有請填寫" style="margin-left:6px;"></label>
+            </div>
+
+            <div class="cat-box">
+                <div class="cat-header"><span class="cat-badge">PPE</span></div>
+                <div class="ctrl-title">頭</div>
+                <label class="chk"><input type="checkbox" checked> 安全帽／防蜂罩網</label>
+                <label class="chk"><input type="checkbox"> 眼罩／面罩／耳塞</label>
+                <label class="chk"><input type="checkbox"> 自供式呼吸器／口罩</label>
+
+                <div class="ctrl-title">手</div>
+                <label class="chk"><input type="checkbox"> 絕緣／防割／隔熱／阻燃／防化手套／手套</label>
+
+                <div class="ctrl-title">身</div>
+                <label class="chk"><input type="checkbox" checked> 反光背心／救生衣</label>
+                <label class="chk"><input type="checkbox"> 阻燃服／防化圍裙／燒焊圍裙</label>
+                <label class="chk"><input type="checkbox" checked> 安全套帶／防墮裝備</label>
+
+                <div class="ctrl-title">腳／其他</div>
+                <label class="chk"><input type="checkbox" checked> 安全鞋／安全水靴</label>
+                <label class="chk"><input type="checkbox"> 急救設備／滅火器</label>
+                <label class="chk"><input type="checkbox"> 其他：<input type="text" placeholder="註明" style="margin-left:6px;"></label>
+            </div>
+
+            <div class="form-group">
+                <label class="lbl">工作的其他危險（如上列未能涵蓋）</label>
+                <input type="text" placeholder="輸入其他危險" style="margin-bottom:6px;">
+                <input type="text" placeholder="界定及選用合適的安全方法">
+            </div>
+        </div>
+    </details>
+
+    <!-- 4. 施工期間安健環事項、小組討論、工作前後檢查 -->
+    <details class="card">
+        <summary>4. 安健環跟進、小組討論及工作前後檢查</summary>
+        <div class="card-body">
+            <div class="form-group">
+                <label class="lbl">施工期間各項安健環事項（1–3）</label>
+                <input type="text" placeholder="1. 不安全/不當行為" style="margin-bottom:4px;">
+                <input type="text" placeholder="1. 修正或跟進措施" style="margin-bottom:10px;">
+                <input type="text" placeholder="2. 不安全/不當行為" style="margin-bottom:4px;">
+                <input type="text" placeholder="2. 修正或跟進措施" style="margin-bottom:10px;">
+                <input type="text" placeholder="3. 不安全/不當行為" style="margin-bottom:4px;">
+                <input type="text" placeholder="3. 修正或跟進措施">
+            </div>
+
+            <div class="form-group">
+                <label class="lbl">小組安全討論事宜</label>
+                <label class="chk"><input type="checkbox"> 沒有需要跟進事項</label>
+                <label class="chk"><input type="checkbox"> 工友穿著合適個人防護裝備</label>
+                <label class="chk"><input type="checkbox"> 依照施工方案施工</label>
+                <label class="chk"><input type="checkbox"> 施工期間各項安健環事項</label>
+                <label class="chk"><input type="checkbox"> 工地整潔</label>
+                <label class="chk"><input type="checkbox"> 其他：<input type="text" placeholder="註明" style="margin-left:6px;"></label>
+            </div>
+
+            <div class="form-group">
+                <label class="lbl">工作前檢查</label>
+                <label class="chk"><input type="checkbox"> 當日所需的個人防護裝備狀況良好</label>
+                <label class="chk"><input type="checkbox"> 當日所需的工具及器材設備狀況良好</label>
+                <label class="chk"><input type="checkbox"> 工地已具備施工方案及圖則</label>
+                <label class="chk"><input type="checkbox"> 工作環境狀況良好</label>
+                <label class="chk"><input type="checkbox"> 工前熱身</label>
+                <label class="chk"><input type="checkbox"> 其他：<input type="text" placeholder="註明" style="margin-left:6px;"></label>
+            </div>
+
+            <div class="form-group">
+                <label class="lbl">工作後檢查</label>
+                <label class="chk"><input type="checkbox"> 工作團隊已進行清潔</label>
+                <label class="chk"><input type="checkbox"> 工作團隊已進行檢查確定現場不存在對公眾的危害（包括安健環之危害）</label>
+                <label class="chk"><input type="checkbox"> 工作過程中沒有安健環事故發生（包括險失事故，投訴等）</label>
+                <label class="chk"><input type="checkbox"> 工作隊伍沒有人受傷或感到身體不適（包括輕微損傷）</label>
+                <label class="chk"><input type="checkbox"> 其他：<input type="text" placeholder="註明" style="margin-left:6px;"></label>
+            </div>
+        </div>
+    </details>
+
+    <!-- 5. 現場電子簽名與匯出 -->
+    <details class="card" open>
+        <summary>5. 現場簽名與匯出 PDF <span id="sigCountTag" class="count-tag"></span></summary>
+        <div class="card-body">
+            <div class="no-print">
+                <div class="form-group">
+                    <label class="lbl">快速點選簽署人（可按公司篩選或搜尋姓名）</label>
+                    <div class="roster-toolbar">
+                        <select id="sigCompanyFilter" class="company-filter" onchange="filterQuickSigners()">
+                            <option value="ALL">全部公司</option>
+                        </select>
+                        <input type="text" id="sigSearchInput" class="roster-search" placeholder="🔍 搜尋簽署人..." oninput="filterQuickSigners()">
+                    </div>
+                    <div id="quick-signers" class="roster-chips"></div>
+                </div>
+                <div class="form-group">
+                    <label class="lbl">所屬公司</label>
+                    <input type="text" id="signerCompany" placeholder="例如：順源 / 分判商名稱">
+                </div>
+                <div class="form-group">
+                    <label class="lbl">角色 / 工種</label>
+                    <input type="text" id="signerRole" placeholder="例如：評估員 / 棚架工 / 隊員">
+                </div>
+                <div class="form-group">
+                    <label class="lbl">姓名</label>
+                    <input type="text" id="signerName" placeholder="輸入簽署人姓名">
+                </div>
+                <label class="lbl">手指簽名區</label>
+                <div class="canvas-wrap">
+                    <canvas id="sigCanvas"></canvas>
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="action-btn btn-gray" onclick="clearSig()">清除重簽</button>
+                    <button type="button" class="action-btn btn-green" onclick="addSigRecord()">✅ 加入簽名紀錄</button>
+                </div>
+            </div>
+
+            <div id="sigList" style="margin-top:14px;"></div>
+
+            <div class="btn-row no-print" style="margin-top:20px;">
+                <button type="button" class="action-btn" onclick="preparePrint()">🖨️ 儲存為 PDF / 列印報告</button>
+            </div>
+        </div>
+    </details>
+</div>
+
+<script>
+    // =========================================================================
+    // 👉 你可以喺度按「公司」修改常駐人員名單（支援 40+ 人）
+    // 格式：{ name: "姓名", company: "公司名稱", role: "角色/工種" }
+    // =========================================================================
+    const presetPeople = {
+        // 1. 隊長或評估員
+        assessors: [
+            // { name: "陳大文", company: "總承建商", role: "安全主任" }
+        ],
+        // 2. 隊員（無需傳譯）- 已按你提供嘅四間公司整合（共 54 人）
+        crewNoTrans: [
+            // Bokeen (1人)
+            { name: "周廷", company: "Bokeen", role: "隊員" },
+
+            // Bokeen_力信 (5人)
+            { name: "林長春", company: "Bokeen_力信", role: "隊員" },
+            { name: "吳漢宗", company: "Bokeen_力信", role: "隊員" },
+            { name: "林偉鴻", company: "Bokeen_力信", role: "隊員" },
+            { name: "蔡偉雄", company: "Bokeen_力信", role: "隊員" },
+            { name: "吳俊邦", company: "Bokeen_力信", role: "隊員" },
+
+            // Bokeen_KWT_TTA (21人)
+            { name: "袁詠濠", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "成際强", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "黃錦潮", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "郭運龍", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "李錦遠", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "李國基", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "何寶豐", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "成際鋒", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "廖思達", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "李家駿", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "鍾文金", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "張偉豪", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "吳啟銘", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "孫碧棋", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "何東生", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "劉柏傑", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "溫運南", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "溫運財", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "林梓豪", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "孫華盛", company: "Bokeen_KWT_TTA", role: "隊員" },
+            { name: "孫濱智", company: "Bokeen_KWT_TTA", role: "隊員" },
+
+            // Bokeen_Xu (27人)
+            { name: "許舜雄", company: "Bokeen_Xu", role: "隊員" },
+            { name: "譚巨彬", company: "Bokeen_Xu", role: "隊員" },
+            { name: "陳美理", company: "Bokeen_Xu", role: "隊員" },
+            { name: "翁武星", company: "Bokeen_Xu", role: "隊員" },
+            { name: "譚鳯勇", company: "Bokeen_Xu", role: "隊員" },
+            { name: "陳文遠", company: "Bokeen_Xu", role: "隊員" },
+            { name: "楊建華", company: "Bokeen_Xu", role: "隊員" },
+            { name: "羅金源", company: "Bokeen_Xu", role: "隊員" },
+            { name: "郭利芳", company: "Bokeen_Xu", role: "隊員" },
+            { name: "吳少麗", company: "Bokeen_Xu", role: "隊員" },
+            { name: "葉建珍", company: "Bokeen_Xu", role: "隊員" },
+            { name: "楊雄雄", company: "Bokeen_Xu", role: "隊員" },
+            { name: "許有維", company: "Bokeen_Xu", role: "隊員" },
+            { name: "王建宁", company: "Bokeen_Xu", role: "隊員" },
+            { name: "王梓炫", company: "Bokeen_Xu", role: "隊員" },
+            { name: "鄧燕", company: "Bokeen_Xu", role: "隊員" },
+            { name: "黃俊琪", company: "Bokeen_Xu", role: "隊員" },
+            { name: "伍乙凡", company: "Bokeen_Xu", role: "隊員" },
+            { name: "趙仙孟", company: "Bokeen_Xu", role: "隊員" },
+            { name: "黃耀東", company: "Bokeen_Xu", role: "隊員" },
+            { name: "陳子宏", company: "Bokeen_Xu", role: "隊員" },
+            { name: "謝慧榆", company: "Bokeen_Xu", role: "隊員" },
+            { name: "李啓添", company: "Bokeen_Xu", role: "隊員" },
+            { name: "溫國華", company: "Bokeen_Xu", role: "隊員" },
+            { name: "伍念沖", company: "Bokeen_Xu", role: "隊員" },
+            { name: "李梓烽", company: "Bokeen_Xu", role: "隊員" },
+            { name: "盧啟耀", company: "Bokeen_Xu", role: "隊員" }
+        ],
+        // 3. 隊員（需要傳譯）
+        crewTrans: [
+            // { name: "Singh", company: "C雜工公司", role: "雜工" }
+        ],
+        // 4. 其他工作隊 / 訪客代表
+        others: [
+            { name: "Hernry Leung", company: "代表", role: "代表" },
+            { name: "Billy Wai", company: "代表", role: "代表" },
+            { name: "Cheung Chung Hang", company: "代表", role: "代表" },
+            { name: "Tiffany Leung", company: "代表", role: "代表" }
+        ]
+    };
+
+    // 將以上四組所有人員自動合併，供「第 5 部分：簽名區」一併快速點選
+    function getAllPeople() {
+        return [
+            ...(presetPeople.assessors || []),
+            ...(presetPeople.crewNoTrans || []),
+            ...(presetPeople.crewTrans || []),
+            ...(presetPeople.others || [])
+        ];
+    }
+
+    function renderRosters() {
+        const groups = ["assessors", "crewNoTrans", "crewTrans", "others"];
+        groups.forEach(key => {
+            const box = document.getElementById("roster-" + key);
+            const list = presetPeople[key] || [];
+            if (list.length === 0) {
+                box.style.display = "none";
+                return;
+            }
+            // 收集該組別內的公司列表
+            const companies = [...new Set(list.map(p => p.company || "未分類"))];
+
+            box.innerHTML = `
+                <div class="roster-toolbar">
+                    <select id="comp-${key}" class="company-filter" onchange="filterRoster('${key}')">
+                        <option value="ALL">全部公司 (${companies.length})</option>
+                        ${companies.map(c => `<option value="${c}">${c}</option>`).join("")}
+                    </select>
+                    <input type="text" id="search-${key}" class="roster-search" placeholder="🔍 搜尋姓名..." oninput="filterRoster('${key}')">
+                    <button type="button" class="mini-btn" onclick="toggleAllRoster('${key}', true)">全選目前</button>
+                    <button type="button" class="mini-btn" onclick="toggleAllRoster('${key}', false)">清除目前</button>
+                </div>
+                <div class="roster-chips" id="chips-${key}">
+                    ${list.map(p => {
+                        const comp = p.company || "未分類";
+                        const labelText = comp !== "未分類" ? `${p.name} (${comp})` : p.name;
+                        return `
+                            <label class="chip-btn" data-name="${p.name.toLowerCase()}" data-company="${comp}">
+                                <input type="checkbox" class="roster-chk-${key}" value="${labelText}" ${key === "others" ? "checked" : ""} onchange="syncRosterInput('${key}')">
+                                <span>${p.name}</span>
+                                <span class="comp-badge">${comp}</span>
+                            </label>
+                        `;
+                    }).join("")}
+                </div>
+            `;
+            syncRosterInput(key);
+        });
+
+        // 渲染簽名區公司篩選與快速點選名單
+        const allPeople = getAllPeople();
+        const qBox = document.getElementById("quick-signers");
+        const sigCompSelect = document.getElementById("sigCompanyFilter");
+
+        if (allPeople.length > 0) {
+            const allCompanies = [...new Set(allPeople.map(p => p.company || "未分類"))];
+            sigCompSelect.innerHTML = `<option value="ALL">全部公司 (${allCompanies.length})</option>` +
+                allCompanies.map(c => `<option value="${c}">${c}</option>`).join("");
+
+            qBox.innerHTML = allPeople.map(p => {
+                const comp = p.company || "";
+                const role = p.role || "";
+                return `
+                    <button type="button" class="chip-btn q-signer-chip" data-name="${p.name.toLowerCase()}" data-company="${comp}" onclick="pickSigner('${p.name}', '${comp}', '${role}')">
+                        ✍️ ${p.name} <span class="comp-badge">${comp}</span>
+                    </button>
+                `;
+            }).join("");
+        } else {
+            qBox.parentElement.style.display = "none";
+        }
+    }
+
+    function filterRoster(key) {
+        const compVal = document.getElementById(`comp-${key}`).value;
+        const kw = document.getElementById(`search-${key}`).value.trim().toLowerCase();
+        document.querySelectorAll(`#chips-${key} .chip-btn`).forEach(chip => {
+            const matchComp = (compVal === "ALL" || chip.dataset.company === compVal);
+            const matchName = chip.dataset.name.includes(kw);
+            chip.style.display = (matchComp && matchName) ? "inline-flex" : "none";
+        });
+    }
+
+    function toggleAllRoster(key, checked) {
+        document.querySelectorAll(`.roster-chk-${key}`).forEach(chk => {
+            if (chk.closest('.chip-btn').style.display !== "none") {
+                chk.checked = checked;
+            }
+        });
+        syncRosterInput(key);
+    }
+
+    function syncRosterInput(key) {
+        const checked = Array.from(document.querySelectorAll(".roster-chk-" + key + ":checked")).map(el => el.value);
+        document.getElementById("input-" + key).value = checked.join(", ");
+        const countEl = document.getElementById("count-" + key);
+        if (countEl) {
+            countEl.textContent = checked.length > 0 ? `(已選 ${checked.length} 人)` : "";
+        }
+    }
+
+    function filterQuickSigners() {
+        const compVal = document.getElementById("sigCompanyFilter").value;
+        const kw = document.getElementById("sigSearchInput").value.trim().toLowerCase();
+        document.querySelectorAll(".q-signer-chip").forEach(btn => {
+            const matchComp = (compVal === "ALL" || btn.dataset.company === compVal);
+            const matchName = btn.dataset.name.includes(kw);
+            btn.style.display = (matchComp && matchName) ? "inline-flex" : "none";
+        });
+    }
+
+    function pickSigner(name, company, role) {
+        document.getElementById("signerName").value = name;
+        document.getElementById("signerCompany").value = company || "";
+        document.getElementById("signerRole").value = role || "";
+    }
+
+    renderRosters();
+
+    // 自動設定當前日期時間
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('workDateTime').value = now.toISOString().slice(0, 16);
+
+    // 簽名畫布初始化
+    const canvas = document.getElementById('sigCanvas');
+    const ctx = canvas.getContext('2d');
+    let drawing = false, signed = false;
+
+    function initCanvas() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        if (rect.width === 0) return;
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = '#000';
+    }
+    window.addEventListener('load', initCanvas);
+    window.addEventListener('resize', initCanvas);
+    document.querySelectorAll('details.card').forEach(d => d.addEventListener('toggle', initCanvas));
+
+    function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+
+    canvas.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        canvas.setPointerCapture(e.pointerId);
+        drawing = true; signed = true;
+        const p = getPos(e);
+        ctx.beginPath(); ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p.x + 0.1, p.y + 0.1); ctx.stroke();
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+        if (!drawing) return;
+        e.preventDefault();
+        const p = getPos(e);
+        ctx.lineTo(p.x, p.y); ctx.stroke();
+    });
+
+    canvas.addEventListener('pointerup', (e) => {
+        drawing = false;
+        canvas.releasePointerCapture(e.pointerId);
+    });
+
+    function clearSig() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        signed = false;
+    }
+
+    function updateSigCount() {
+        const total = document.querySelectorAll("#sigList .sig-item").length;
+        document.getElementById("sigCountTag").textContent = total > 0 ? `(已簽 ${total} 人)` : "";
+    }
+
+    function addSigRecord() {
+        const comp = document.getElementById('signerCompany').value.trim();
+        const role = document.getElementById('signerRole').value.trim();
+        const name = document.getElementById('signerName').value.trim();
+        if (!name) { alert('請輸入姓名！'); return; }
+        if (!signed) { alert('請先在白框內簽名！'); return; }
+
+        const imgUrl = canvas.toDataURL('image/png');
+        const t = new Date();
+        const timeStr = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+        const meta = [comp, role].filter(Boolean).join("・") || "-";
+
+        const div = document.createElement('div');
+        div.className = 'sig-item';
+        div.innerHTML = `
+            <div>
+                <div><strong>${name}</strong> <span style="font-size:12px;color:#2b6cb0;font-weight:600;">(${meta})</span></div>
+                <div style="font-size:12px;color:#718096;">時間：${timeStr}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <img src="${imgUrl}" alt="簽名">
+                <button type="button" class="btn-red no-print" onclick="this.closest('.sig-item').remove(); updateSigCount();">刪除</button>
+            </div>
+        `;
+        document.getElementById('sigList').appendChild(div);
+        document.getElementById('signerName').value = '';
+        clearSig();
+        updateSigCount();
+    }
+
+    function preparePrint() {
+        document.querySelectorAll('details.card').forEach(d => d.open = true);
+        setTimeout(() => window.print(), 150);
+    }
+</script>
+
+</body>
+</html>
